@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sxgura Security Panel</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#000;
+color:#fff;
+overflow-x:hidden;
+min-height:100vh;
+}
+
+/* FONDO */
+
+.bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at top,#220000,#000 60%);
+z-index:-1;
+}
+
+/* CONTENEDOR */
+
+.container{
+padding:20px;
+max-width:500px;
+margin:auto;
+}
+
+/* LOGO */
+
+.logo{
+text-align:center;
+margin-top:30px;
+margin-bottom:30px;
+}
+
+.logo h1{
+font-size:32px;
+color:#ff0000;
+text-shadow:0 0 15px #ff0000;
+}
+
+.logo p{
+margin-top:10px;
+color:#aaa;
+font-size:14px;
+}
+
+/* CARD */
+
+.card{
+background:#080808;
+border:1px solid #1a1a1a;
+border-radius:20px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:0 0 20px rgba(255,0,0,.15);
+}
+
+/* BOTONES */
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+background:linear-gradient(45deg,#ff0000,#990000);
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+transition:.3s;
+}
+
+button:hover{
+transform:scale(1.02);
+box-shadow:0 0 20px rgba(255,0,0,.35);
+}
+
+/* STATUS */
+
+.status{
+margin-top:15px;
+padding:12px;
+border-radius:12px;
+background:#111;
+font-size:14px;
+line-height:1.7;
+}
+
+/* VIDEO */
+
+video{
+width:100%;
+border-radius:16px;
+margin-top:15px;
+border:1px solid #222;
+}
+
+/* TITLES */
+
+.section-title{
+font-size:18px;
+margin-bottom:15px;
+color:#ff2a2a;
+}
+
+/* ADMIN */
+
+.admin-panel{
+display:none;
+margin-top:20px;
+}
+
+/* INPUTS */
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+background:#111;
+border:1px solid #222;
+border-radius:12px;
+color:#fff;
+}
+
+/* DEVICE BOX */
+
+.info-box{
+background:#111;
+padding:12px;
+border-radius:12px;
+margin-top:10px;
+font-size:13px;
+line-height:1.8;
+}
+
+/* FOOTER */
+
+.footer{
+text-align:center;
+margin-top:30px;
+font-size:12px;
+color:#777;
+padding-bottom:30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bg"></div>
+
+<div class="container">
+
+<div class="logo">
+<h1>Sxgura Security</h1>
+<p>Sistema de monitoreo autorizado</p>
+</div>
+
+<!-- PANEL USUARIO -->
+
+<div class="card">
+
+<div class="section-title">
+Permisos del dispositivo
+</div>
+
+<p style="color:#aaa;font-size:13px;line-height:1.7;">
+Al activar los permisos, el navegador solicitará acceso a:
+ubicación, cámara y micrófono.
+</p>
+
+<button onclick="activarTodo()">
+ACTIVAR PERMISOS
+</button>
+
+<button onclick="toggleVibration()">
+VIBRAR DISPOSITIVO
+</button>
+
+<div class="status" id="status">
+Esperando permisos...
+</div>
+
+<video id="video" autoplay muted playsinline></video>
+
+<div class="info-box" id="deviceInfo">
+Cargando información del dispositivo...
+</div>
+
+</div>
+
+<!-- LOGIN ADMIN -->
+
+<div class="card">
+
+<div class="section-title">
+Panel Admin
+</div>
+
+<input type="text" id="adminUser" placeholder="Usuario">
+
+<input type="password" id="adminPass" placeholder="Contraseña">
+
+<button onclick="loginAdmin()">
+INGRESAR
+</button>
+
+</div>
+
+<!-- PANEL ADMIN -->
+
+<div class="card admin-panel" id="adminPanel">
+
+<div class="section-title">
+Dispositivo conectado
+</div>
+
+<div class="info-box" id="adminData">
+
+Esperando datos...
+
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 Sxgura Inc
+</div>
+
+</div>
+
+<script>
+
+/* DATOS */
+
+let currentPosition = "No disponible";
+let vibrationActive = false;
+let vibrationInterval = null;
+
+/* ELEMENTOS */
+
+const statusBox =
+document.getElementById("status");
+
+const video =
+document.getElementById("video");
+
+const deviceInfo =
+document.getElementById("deviceInfo");
+
+const adminData =
+document.getElementById("adminData");
+
+/* ACTIVAR TODO */
+
+async function activarTodo(){
+
+statusBox.innerHTML =
+"Solicitando permisos...";
+
+try{
+
+/* CAMARA + MICRO */
+
+const stream =
+await navigator.mediaDevices.getUserMedia({
+video:true,
+audio:true
+});
+
+video.srcObject = stream;
+
+/* UBICACION */
+
+navigator.geolocation.watchPosition(
+
+(pos)=>{
+
+const lat =
+pos.coords.latitude;
+
+const lon =
+pos.coords.longitude;
+
+currentPosition =
+`Latitud: ${lat}<br>
+Longitud: ${lon}`;
+
+updateAdmin();
+
+},
+
+(err)=>{
+
+currentPosition =
+"Ubicación denegada";
+
+updateAdmin();
+
+}
+
+);
+
+/* INFO DISPOSITIVO */
+
+let batteryText =
+"No disponible";
+
+if(navigator.getBattery){
+
+const battery =
+await navigator.getBattery();
+
+batteryText =
+Math.floor(
+battery.level * 100
+) + "%";
+
+}
+
+/* DATOS */
+
+deviceInfo.innerHTML = `
+
+<b>Navegador:</b>
+${navigator.userAgent}
+<br><br>
+
+<b>Idioma:</b>
+${navigator.language}
+<br><br>
+
+<b>Plataforma:</b>
+${navigator.platform}
+<br><br>
+
+<b>Batería:</b>
+${batteryText}
+
+`;
+
+statusBox.innerHTML = `
+
+✅ Cámara activa<br>
+✅ Micrófono activo<br>
+✅ Ubicación activa
+
+`;
+
+updateAdmin();
+
+}catch(e){
+
+statusBox.innerHTML =
+"❌ Permisos denegados";
+
+console.log(e);
+
+}
+
+}
+
+/* VIBRACION */
+
+function toggleVibration(){
+
+if(!navigator.vibrate){
+alert("Vibración no compatible");
+return;
+}
+
+if(!vibrationActive){
+
+vibrationActive = true;
+
+vibrationInterval = setInterval(()=>{
+
+navigator.vibrate([400,200]);
+
+},600);
+
+}else{
+
+vibrationActive = false;
+
+clearInterval(vibrationInterval);
+
+navigator.vibrate(0);
+
+}
+
+}
+
+/* LOGIN ADMIN */
+
+function loginAdmin(){
+
+const user =
+document.getElementById("adminUser").value;
+
+const pass =
+document.getElementById("adminPass").value;
+
+/* CREDENCIALES */
+
+if(
+user === "sxgura"
+&&
+pass === "2026"
+){
+
+document.getElementById("adminPanel")
+.style.display = "block";
+
+updateAdmin();
+
+}else{
+
+alert("Credenciales incorrectas");
+
+}
+
+}
+
+/* UPDATE ADMIN */
+
+function updateAdmin(){
+
+adminData.innerHTML = `
+
+<b>Estado:</b>
+Dispositivo conectado
+<br><br>
+
+<b>Ubicación:</b>
+<br>
+${currentPosition}
+<br><br>
+
+<b>Hora:</b>
+${new Date().toLocaleTimeString()}
+<br><br>
+
+<b>Fecha:</b>
+${new Date().toLocaleDateString()}
+
+`;
+
+}
+
+/* ONLINE / OFFLINE */
+
+window.addEventListener("online",()=>{
+
+statusBox.innerHTML +=
+"<br>🌐 Conexión restaurada";
+
+});
+
+window.addEventListener("offline",()=>{
+
+statusBox.innerHTML +=
+"<br>⚠ Sin internet";
+
+});
+
+</script>
+
+</body>
+</html>
